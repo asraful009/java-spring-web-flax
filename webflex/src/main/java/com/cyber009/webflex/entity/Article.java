@@ -18,13 +18,12 @@ import java.util.UUID;
 @ToString
 @EqualsAndHashCode
 public class Article {
-    @Id
-    private UUID id;
+    private String id;
     private String title;
     private String image;
 //    private List<String> tags;
-    private String author;
-    private LocalDateTime publishDateTime;
+//    private String author;
+//    private LocalDateTime publishDateTime;
 //    private List<String> contents;
 
 }

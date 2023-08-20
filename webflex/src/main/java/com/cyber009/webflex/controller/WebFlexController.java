@@ -5,17 +5,17 @@ import com.cyber009.webflex.entity.Article;
 import com.cyber009.webflex.repository.ArticleRepository;
 import com.github.javafaker.Faker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/")
@@ -23,19 +23,19 @@ public class WebFlexController {
 
     private final ArticleRepository articleRepository;
 
-    private final List<ArticleDto> articleDtoList;
+    private final List<Article> articleList;
 
 
     @Autowired
     public WebFlexController(ArticleRepository articleRepository) {
         this.articleRepository = articleRepository;
-        articleDtoList = new LinkedList<>();
-        generate();
+        articleList = new LinkedList<>();
+
     }
 
     @GetMapping("/{id}")
     public Mono<ArticleDto> findById(@PathVariable() UUID id) {
-        return Mono.justOrEmpty(articleDtoList.stream().filter(articleDto -> articleDto.getId().equals(id)).findFirst().orElse(null));
+        return Mono.empty();// .justOrEmpty(articleDtoList.stream().filter(articleDto -> articleDto.getId().equals(id)).findFirst().orElse(null));
     }
 
     @GetMapping
@@ -43,13 +43,14 @@ public class WebFlexController {
                                     @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
         if(pageNo < 1) pageNo = 1;
         if(pageSize < 1) pageSize = 10;
+        Pageable page = PageRequest.of(0, 10);
         return articleRepository.findAll();
 //        return Flux.fromIterable(articleDtoList.stream().skip((pageNo-1)*pageSize).limit(pageSize).collect(Collectors.toList()));
     }
 
 
 
-    private List<ArticleDto> generate() {
+    private Flux<Article> generate() {
         Faker faker = new Faker();
         for(int i=0; i<10000; i++) {
             int year = faker.number().numberBetween(1270, 1941);  // Example range
@@ -60,18 +61,19 @@ public class WebFlexController {
             int second = faker.number().numberBetween(0, 60);
             LocalDateTime randomDateTime = LocalDateTime.of(year, month, day, hour, minute, 0);
             randomDateTime.atZone(ZoneOffset.UTC);
-            articleDtoList.add(ArticleDto.builder()
-                    .id(UUID.randomUUID())
+            articleList.add(Article.builder()
+                    .id(UUID.randomUUID().toString())
                     .title(faker.book().title())
                     .image(faker.internet().image())
-                    .tags(Arrays.stream(new String[] { faker.internet().slug(), faker.internet().slug() }).toList())
-                    .author(faker.book().author())
-                    .publishDateTime(randomDateTime)
-                    .contents(faker.lorem().paragraphs(faker.number().numberBetween(26, 35)))
+//                    .tags(Arrays.stream(new String[] { faker.internet().slug(), faker.internet().slug() }).toList())
+//                    .author(faker.book().author())
+//                    .publishDateTime(randomDateTime)
+//                    .contents(faker.lorem().paragraphs(faker.number().numberBetween(26, 35)))
                     .build()
             );
         }
-        return articleDtoList;
+        Flux<Article> list = articleRepository.saveAll(articleList);
+        return list;
     }
 
 }
