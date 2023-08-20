@@ -1,8 +1,13 @@
 package com.cyber009.webflex.controller;
 
 import com.cyber009.webflex.dto.ArticleDto;
+import com.cyber009.webflex.entity.Article;
+import com.cyber009.webflex.repository.ArticleRepository;
 import com.github.javafaker.Faker;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -10,29 +15,39 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/")
 public class WebFlexController {
 
+    private final ArticleRepository articleRepository;
+
     private final List<ArticleDto> articleDtoList;
-    public WebFlexController() {
+
+
+    @Autowired
+    public WebFlexController(ArticleRepository articleRepository) {
+        this.articleRepository = articleRepository;
         articleDtoList = new LinkedList<>();
         generate();
     }
+
+    @GetMapping("/{id}")
+    public Mono<ArticleDto> findById(@PathVariable() UUID id) {
+        return Mono.justOrEmpty(articleDtoList.stream().filter(articleDto -> articleDto.getId().equals(id)).findFirst().orElse(null));
+    }
+
     @GetMapping
-    public List<ArticleDto> findAll(@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+    public Flux<Article> findAll(@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
                                     @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
         if(pageNo < 1) pageNo = 1;
         if(pageSize < 1) pageSize = 10;
-
-        return articleDtoList.stream().skip((pageNo-1)*pageSize).limit(pageSize).toList();
+        return articleRepository.findAll();
+//        return Flux.fromIterable(articleDtoList.stream().skip((pageNo-1)*pageSize).limit(pageSize).collect(Collectors.toList()));
     }
 
-    @GetMapping("/{id}")
-    public ArticleDto findById(@PathVariable UUID id) {
-        return articleDtoList.stream().filter(articleDto -> articleDto.getId().equals(id)).findFirst().orElse(null);
-    }
+
 
     private List<ArticleDto> generate() {
         Faker faker = new Faker();

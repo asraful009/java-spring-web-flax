@@ -1,0 +1,24 @@
+
+spring:
+  r2dbc:
+    url: r2dbc:oracle://localhost:1521/xe
+    username: lims
+    password: lims
+    initialization-mode: always
+
+    defer-datasource-initialization: true
+
+logging:
+  level:
+    io:
+      r2dbc:
+        oracle: TRACE
+
+
+#spring.r2dbc.initial-size=10
+
+#spring.datasource.url=jdbc:oracle:thin:@localhost:1521:xe
+#spring.datasource.username=lims
+#spring.datasource.password=lims
+#spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+#spring.jpa.database-platform=org.hibernate.dialect.Oracle12cDialect
