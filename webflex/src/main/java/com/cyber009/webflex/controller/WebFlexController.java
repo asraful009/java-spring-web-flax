@@ -4,9 +4,12 @@ import com.cyber009.webflex.dto.ArticleDto;
 import com.cyber009.webflex.entity.Article;
 import com.cyber009.webflex.repository.ArticleRepository;
 import com.github.javafaker.Faker;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
+import org.springframework.data.r2dbc.core.ReactiveSelectOperation;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,19 +22,20 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/")
+@RequiredArgsConstructor
 public class WebFlexController {
 
     private final ArticleRepository articleRepository;
 
     private final List<Article> articleList;
 
-
-    @Autowired
-    public WebFlexController(ArticleRepository articleRepository) {
-        this.articleRepository = articleRepository;
-        articleList = new LinkedList<>();
-
-    }
+//
+//    @Autowired
+//    public WebFlexController(ArticleRepository articleRepository) {
+//        this.articleRepository = articleRepository;
+//        articleList = new LinkedList<>();
+//
+//    }
 
     @GetMapping("/{id}")
     public Mono<ArticleDto> findById(@PathVariable() UUID id) {
